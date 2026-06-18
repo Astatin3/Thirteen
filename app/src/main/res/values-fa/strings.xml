@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">thirteen</string>
+    <string name="app_name">Thirteen</string>
     <string name="app_permissions_toast">مجوز توسط کاربر داده نشد.</string>
     <string name="visualizer_permissions_toast">مجوز ضبط صدا برای بصری ساز مورد نیاز است.</string>
     <string name="main_fragment_section_activity">فعالیت</string>

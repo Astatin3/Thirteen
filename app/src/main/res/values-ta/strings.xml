@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">thirteen</string>
+    <string name="app_name">Thirteen</string>
     <string name="app_permissions_toast">பயனர் இசைவு அளிக்கவில்லை</string>
     <string name="visualizer_permissions_toast">ஒலி உணர்விக்கு ஒலிப்பதிவு இசைவு தேவை. </string>
     <string name="main_fragment_section_activity">செயல்பாடு</string>

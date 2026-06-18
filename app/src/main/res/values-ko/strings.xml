@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">thirteen</string>
+    <string name="app_name">Thirteen</string>
     <string name="app_permissions_toast">사용자에 의해 권한이 허용되어 있지 않습니다.</string>
     <string name="visualizer_permissions_toast">시각화 기능을 사용하려면 오디오 녹음 권한이 필요합니다.</string>
     <string name="main_fragment_section_activity">액티비티</string>

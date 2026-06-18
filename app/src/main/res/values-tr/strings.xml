@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">thirteen</string>
+    <string name="app_name">Thirteen</string>
     <string name="app_permissions_toast">Kullanıcı, izinleri vermedi.</string>
     <string name="visualizer_permissions_toast">Görselleştirici için ses kaydetme izni gereklidir.</string>
     <string name="main_fragment_section_activity">Etkinlik</string>

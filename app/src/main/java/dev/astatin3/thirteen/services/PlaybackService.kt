@@ -322,7 +322,11 @@ class PlaybackService : MediaLibraryService(), LifecycleOwner {
             controller: MediaSession.ControllerInfo,
             mediaItems: List<MediaItem>,
         ) = lifecycleScope.future {
-            mediaRepositoryTree.resolveMediaItems(mediaItems)
+            val resolvedMediaItems = mediaRepositoryTree.resolveMediaItems(mediaItems)
+            if (mediaItems.any { MediaRepositoryTree.isShuffleAction(it.mediaId) }) {
+                player.shuffleModeEnabled = true
+            }
+            resolvedMediaItems
         }
 
         @OptIn(UnstableApi::class)
@@ -334,6 +338,10 @@ class PlaybackService : MediaLibraryService(), LifecycleOwner {
             startPositionMs: Long,
         ) = lifecycleScope.future {
             val resolvedMediaItems = mediaRepositoryTree.resolveMediaItems(mediaItems)
+
+            if (mediaItems.any { MediaRepositoryTree.isShuffleAction(it.mediaId) }) {
+                player.shuffleModeEnabled = true
+            }
 
             launch {
                 resumptionPlaylistRepository.onMediaItemsChanged(

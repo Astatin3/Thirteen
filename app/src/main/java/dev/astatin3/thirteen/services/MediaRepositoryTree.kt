@@ -55,6 +55,28 @@ class MediaRepositoryTree(
     )
 
     /**
+     * Build a synthetic "Play All" media item for the given parent URI.
+     */
+    private fun buildPlayAllMediaItem(parentUri: Uri) = buildMediaItem(
+        title = context.getString(R.string.play_all),
+        mediaId = "$PLAY_ALL_MEDIA_ITEM_PREFIX$parentUri",
+        isPlayable = true,
+        isBrowsable = false,
+        mediaType = MediaMetadata.MEDIA_TYPE_MIXED,
+    )
+
+    /**
+     * Build a synthetic "Shuffle" media item for the given parent URI.
+     */
+    private fun buildShuffleMediaItem(parentUri: Uri) = buildMediaItem(
+        title = context.getString(R.string.shuffle_play),
+        mediaId = "$SHUFFLE_MEDIA_ITEM_PREFIX$parentUri",
+        isPlayable = true,
+        isBrowsable = false,
+        mediaType = MediaMetadata.MEDIA_TYPE_MIXED,
+    )
+
+    /**
      * Albums media item.
      */
     private val albumsMediaItem = buildMediaItem(
@@ -155,6 +177,16 @@ class MediaRepositoryTree(
             mediaId.startsWith(PROVIDER_MEDIA_ITEM_ID_PREFIX) ->
                 mediaIdToProvider(mediaId)?.toMedia3MediaItem()
 
+            mediaId.startsWith(PLAY_ALL_MEDIA_ITEM_PREFIX) -> {
+                val uri = mediaId.removePrefix(PLAY_ALL_MEDIA_ITEM_PREFIX).toUri()
+                buildPlayAllMediaItem(uri)
+            }
+
+            mediaId.startsWith(SHUFFLE_MEDIA_ITEM_PREFIX) -> {
+                val uri = mediaId.removePrefix(SHUFFLE_MEDIA_ITEM_PREFIX).toUri()
+                buildShuffleMediaItem(uri)
+            }
+
             else -> mediaIdToMediaItem(mediaId)?.toMedia3MediaItem(context.resources)
         }
     }
@@ -212,8 +244,16 @@ class MediaRepositoryTree(
                 when (mediaItemUriToMediaType(mediaItemUri)) {
                     MediaType.ALBUM -> repository.album(
                         mediaItemUri
-                    ).toOneShotResult().second.map { albumAudios ->
-                        albumAudios.toMedia3MediaItem(context.resources)
+                    ).toOneShotResult().second.let { albumAudios ->
+                        val tracks = albumAudios.map { it.toMedia3MediaItem(context.resources) }
+                        if (tracks.isNotEmpty()) {
+                            listOf(
+                                buildPlayAllMediaItem(mediaItemUri),
+                                buildShuffleMediaItem(mediaItemUri),
+                            ) + tracks
+                        } else {
+                            tracks
+                        }
                     }
 
                     MediaType.ARTIST -> repository.artist(
@@ -243,8 +283,16 @@ class MediaRepositoryTree(
 
                     MediaType.PLAYLIST -> repository.playlist(
                         mediaItemUri
-                    ).toOneShotResult().second.map { playlistAudio ->
-                        playlistAudio.toMedia3MediaItem(context.resources)
+                    ).toOneShotResult().second.let { playlistAudios ->
+                        val tracks = playlistAudios.map { it.toMedia3MediaItem(context.resources) }
+                        if (tracks.isNotEmpty()) {
+                            listOf(
+                                buildPlayAllMediaItem(mediaItemUri),
+                                buildShuffleMediaItem(mediaItemUri),
+                            ) + tracks
+                        } else {
+                            tracks
+                        }
                     }
 
                     null -> null
@@ -262,6 +310,16 @@ class MediaRepositoryTree(
             val searchQuery = item.requestMetadata.searchQuery
             when {
                 searchQuery != null -> addAll(search(searchQuery))
+                item.mediaId.startsWith(PLAY_ALL_MEDIA_ITEM_PREFIX) -> {
+                    val uri = item.mediaId.removePrefix(PLAY_ALL_MEDIA_ITEM_PREFIX).toUri()
+                    addAll(resolveSyntheticParentTracks(uri))
+                }
+
+                item.mediaId.startsWith(SHUFFLE_MEDIA_ITEM_PREFIX) -> {
+                    val uri = item.mediaId.removePrefix(SHUFFLE_MEDIA_ITEM_PREFIX).toUri()
+                    addAll(resolveSyntheticParentTracks(uri))
+                }
+
                 item.localConfiguration?.uri != null -> add(item)
                 else -> getItem(item.mediaId)?.let { mediaItem ->
                     add(mediaItem)
@@ -269,6 +327,14 @@ class MediaRepositoryTree(
             }
         }
     }
+
+    private suspend fun resolveSyntheticParentTracks(
+        uri: Uri
+    ): List<MediaItem> = when (mediaItemUriToMediaType(uri)) {
+        MediaType.ALBUM -> repository.album(uri).toOneShotResult().second
+        MediaType.PLAYLIST -> repository.playlist(uri).toOneShotResult().second
+        else -> emptyList()
+    }.map { it.toMedia3MediaItem(context.resources) }
 
     /**
      * Given a query, search for media items.
@@ -366,6 +432,12 @@ class MediaRepositoryTree(
 
         // Provider changed ID
         private const val PROVIDER_CHANGED_MEDIA_ITEM_ID = "[provider_changed]"
+
+        // Synthetic action IDs for inline play-all / shuffle
+        private const val PLAY_ALL_MEDIA_ITEM_PREFIX = "[play_all]"
+        private const val SHUFFLE_MEDIA_ITEM_PREFIX = "[shuffle]"
+
+        fun isShuffleAction(mediaId: String) = mediaId.startsWith(SHUFFLE_MEDIA_ITEM_PREFIX)
 
         /**
          * Converts a flow of [Result] to a one-shot result of [T].

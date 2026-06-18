@@ -11,34 +11,33 @@
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:gravity="bottom|end"
-    android:orientation="vertical">
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/shufflePlayExtendedFloatingActionButton"
-        style="?attr/floatingActionButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="18dp"
-        android:tooltipText="@string/shuffle_play"
-        android:visibility="gone"
-        app:collapsedSize="46dp"
-        app:icon="@drawable/ic_shuffle_play"
-        app:materialThemeOverlay="@style/ThemeOverlay.Material3Expressive.FloatingActionButton.TertiaryContainer"
-        tools:visibility="visible" />
+    android:gravity="end"
+    android:orientation="horizontal">
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/playAllExtendedFloatingActionButton"
         style="?attr/floatingActionButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginVertical="16dp"
         android:text="@string/play_all"
         android:visibility="gone"
         app:icon="@drawable/ic_play_arrow"
         app:materialThemeOverlay="@style/ThemeOverlay.Material3Expressive.FloatingActionButton.PrimaryContainer"
+        tools:visibility="visible" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/shufflePlayExtendedFloatingActionButton"
+        style="?attr/floatingActionButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="16dp"
+        android:tooltipText="@string/shuffle_play"
+        android:visibility="gone"
+        app:collapsedSize="46dp"
+        app:icon="@drawable/ic_shuffle_play"
+        app:materialThemeOverlay="@style/ThemeOverlay.Material3Expressive.FloatingActionButton.TertiaryContainer"
         tools:visibility="visible" />
 
 </LinearLayout>

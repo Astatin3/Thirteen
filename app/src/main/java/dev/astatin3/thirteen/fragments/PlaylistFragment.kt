@@ -34,7 +34,6 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.util.Collections
 import dev.astatin3.thirteen.R
 import dev.astatin3.thirteen.ext.Bundle
 import dev.astatin3.thirteen.ext.getParcelable
@@ -52,7 +51,6 @@ import dev.astatin3.thirteen.ui.recyclerview.SimpleListAdapter
 import dev.astatin3.thirteen.ui.recyclerview.UniqueItemDiffCallback
 import dev.astatin3.thirteen.ui.views.FullscreenLoadingProgressBar
 import dev.astatin3.thirteen.ui.views.ListItem
-import dev.astatin3.thirteen.ThirteenApplication
 import dev.astatin3.thirteen.utils.PermissionsChecker
 import dev.astatin3.thirteen.utils.PermissionsUtils
 import dev.astatin3.thirteen.utils.TimestampFormatter
@@ -90,10 +88,10 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
     private val renamePlaylistMenuItem get() = toolbar.menu.findItem(R.id.renamePlaylist)
 
     // Recyclerview
-    private var currentPlaylistAudios = listOf<Audio>()
-    private var canReorder = true
+    private var currentPlaylistAudios = mutableListOf<Audio>()
+    private var canReorder = false
 
-    private val adapter by lazy {
+    private val adapter: SimpleListAdapter<Audio, ListItem> by lazy {
         object : SimpleListAdapter<Audio, ListItem>(
             UniqueItemDiffCallback(),
             ::ListItem,
@@ -101,29 +99,27 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
             override fun submitList(list: List<Audio>?) {
                 val newList = list.orEmpty()
                 Log.d(LOG_TAG, "submitList: ${newList.size} items, uri0=${newList.firstOrNull()?.uri}, fromDb=${newList.map { it.title?.take(15) }}")
-                currentPlaylistAudios = newList
+                currentPlaylistAudios = newList.toMutableList()
                 super.submitList(list)
             }
 
             override fun ViewHolder.onPrepareView() {
                 view.setLeadingIconImage(R.drawable.ic_music_note)
                 view.setTrailingIconImage(R.drawable.ic_drag_handle)
+
+                view.findViewById<ImageView>(R.id.trailingIconImageView).setOnTouchListener { _, event ->
+                    Log.d(LOG_TAG, "drag handle touch: action=${event.actionMasked}, canReorder=$canReorder, position=$bindingAdapterPosition")
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        if (canReorder) {
+                            itemTouchHelper.startDrag(this)
+                        }
+                    }
+                    true
+                }
             }
 
             override fun ViewHolder.onBindView(item: Audio) {
-                val trailingIconView = view.findViewById<ImageView>(R.id.trailingIconImageView)
-                if (canReorder) {
-                    view.setTrailingIconImage(R.drawable.ic_drag_handle)
-                    trailingIconView.setOnTouchListener { v, event ->
-                        if (event.action == MotionEvent.ACTION_DOWN) {
-                            itemTouchHelper.startDrag(this)
-                        }
-                        false
-                    }
-                } else {
-                    view.trailingIconImage = null
-                    trailingIconView.setOnTouchListener(null)
-                }
+                view.setTrailingIconImage(R.drawable.ic_drag_handle)
                 view.setOnClickListener {
                     viewModel.playPlaylist(bindingAdapterPosition)
                 }
@@ -160,11 +156,15 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
             ): Boolean {
                 val from = viewHolder.bindingAdapterPosition
                 val to = target.bindingAdapterPosition
+                if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) {
+                    return false
+                }
 
                 Log.d(LOG_TAG, "onMove($from -> $to), curSize=${currentPlaylistAudios.size}")
 
-                Collections.swap(currentPlaylistAudios, from, to)
-                recyclerView.adapter!!.notifyItemMoved(from, to)
+                val item = currentPlaylistAudios.removeAt(from)
+                currentPlaylistAudios.add(to, item)
+                adapter.submitList(currentPlaylistAudios.toList())
 
                 return true
             }
@@ -281,6 +281,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
         }
 
         recyclerView.adapter = adapter
+        itemTouchHelper.attachToRecyclerView(recyclerView)
 
         playAllExtendedFloatingActionButton.setOnClickListener {
             viewModel.playPlaylist()
@@ -322,15 +323,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
                         val (playlist, audios) = it.data
                         Log.d(LOG_TAG, "playlist Flow emitted Success: ${audios.size} items, first3=${audios.take(3).map { a -> a.title?.take(15) }}, type=${playlist.type}")
 
-                        val isPlaylist = playlist.type == Playlist.Type.PLAYLIST
-                        if (canReorder != isPlaylist) {
-                            canReorder = isPlaylist
-                            if (isPlaylist) {
-                                itemTouchHelper.attachToRecyclerView(recyclerView)
-                            } else {
-                                itemTouchHelper.attachToRecyclerView(null)
-                            }
-                        }
+                        canReorder = true
 
                         val playlistName = playlist.name ?: getString(
                             when (playlist.type) {

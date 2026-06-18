@@ -26,4 +26,5 @@ import java.time.Instant
 data class Favorite(
     @PrimaryKey @ColumnInfo(name = "audio_uri", defaultValue = "") val audioUri: Uri,
     @ColumnInfo(name = "added_at") val addedAt: Instant,
+    @ColumnInfo(name = "sort_order", defaultValue = "0") val sortOrder: Int = 0,
 )

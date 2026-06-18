@@ -88,10 +88,13 @@
 
     <ImageView
         android:id="@+id/trailingIconImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
+        android:clickable="true"
+        android:focusable="true"
         android:importantForAccessibility="no"
+        android:padding="12dp"
         android:visibility="gone"
         app:tint="@color/list_item_secondary"
         tools:src="@android:drawable/star_on"

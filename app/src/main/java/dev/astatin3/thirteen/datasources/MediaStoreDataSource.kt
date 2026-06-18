@@ -843,7 +843,18 @@ class MediaStoreDataSource(
         audioUris: List<Uri>,
     ) = try {
         when {
-            playlistUri == favoritesUri -> Result.Failure(Error.IO)
+            playlistUri == favoritesUri -> {
+                val dao = database.getFavoriteDao()
+
+                database.withTransaction {
+                    audioUris.forEachIndexed { index, audioUri ->
+                        dao._setItemOrder(audioUri, index)
+                    }
+                }
+
+                Result.Success(Unit)
+            }
+
             else -> {
                 val playlistId = ContentUris.parseId(playlistUri)
                 Log.d(LOG_TAG, "reorderPlaylist: playlistId=$playlistId, ${audioUris.size} items")

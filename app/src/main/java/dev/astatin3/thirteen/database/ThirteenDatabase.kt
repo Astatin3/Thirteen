@@ -59,7 +59,7 @@ import dev.astatin3.thirteen.database.entities.SubsonicProvider
         /* Local Media Stats */
         LocalMediaStats::class,
     ],
-    version = 10,
+    version = 11,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
@@ -238,12 +238,33 @@ abstract class ThirteenDatabase : RoomDatabase() {
             }
         }
 
+        object Migration10To11 : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        ALTER TABLE favorite
+                        ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                        UPDATE favorite
+                        SET sort_order = (
+                            SELECT COUNT(*) - 1
+                            FROM favorite AS ordered_favorite
+                            WHERE ordered_favorite.added_at <= favorite.added_at
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun get(context: Context) = Room.databaseBuilder(
             context.applicationContext,
             ThirteenDatabase::class.java,
             "thirteen_database",
         )
-            .addMigrations(Migration7To8, Migration9To10)
+            .addMigrations(Migration7To8, Migration9To10, Migration10To11)
             .build()
     }
 }

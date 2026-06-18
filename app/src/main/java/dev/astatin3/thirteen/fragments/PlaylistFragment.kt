@@ -32,7 +32,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Collections
@@ -91,7 +90,6 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
 
     // Recyclerview
     private var currentPlaylistAudios = listOf<Audio>()
-    private var reorderJob: Job? = null
 
     private val adapter by lazy {
         object : SimpleListAdapter<Audio, ListItem>(
@@ -156,12 +154,9 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
                 Collections.swap(currentPlaylistAudios, from, to)
                 recyclerView.adapter!!.notifyItemMoved(from, to)
 
-                reorderJob?.cancel()
-                reorderJob = viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.reorderPlaylist(
-                        currentPlaylistAudios.map { audio -> audio.uri }
-                    )
-                }
+                viewModel.reorderPlaylist(
+                    currentPlaylistAudios.map { audio -> audio.uri }
+                )
 
                 return true
             }

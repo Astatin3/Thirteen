@@ -7,15 +7,18 @@ package dev.astatin3.thirteen.viewmodels
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import dev.astatin3.thirteen.models.FlowResult
 import dev.astatin3.thirteen.models.FlowResult.Companion.asFlowResult
@@ -72,11 +75,19 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
         }
     }
 
-    suspend fun reorderPlaylist(audioUris: List<Uri>) {
-        playlistUri.value?.let { playlistUri ->
-            withContext(Dispatchers.IO) {
-                mediaRepository.reorderPlaylist(playlistUri, audioUris)
-            }
+    private var reorderJob: Job? = null
+
+    fun reorderPlaylist(audioUris: List<Uri>) {
+        Log.d(LOG_TAG, "reorderPlaylist called with ${audioUris.size} items")
+        reorderJob?.cancel()
+        reorderJob = viewModelScope.launch {
+            playlistUri.value?.let { playlistUri ->
+                Log.d(LOG_TAG, "Persisting reorder for $playlistUri")
+                withContext(Dispatchers.IO) {
+                    mediaRepository.reorderPlaylist(playlistUri, audioUris)
+                }
+                Log.d(LOG_TAG, "Reorder persisted successfully")
+            } ?: Log.w(LOG_TAG, "Cannot reorder: playlistUri is null")
         }
     }
 
@@ -94,5 +105,9 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
         }?.let {
             playAudio(it.shuffled(), 0)
         }
+    }
+
+    companion object {
+        private val LOG_TAG = PlaylistViewModel::class.simpleName!!
     }
 }

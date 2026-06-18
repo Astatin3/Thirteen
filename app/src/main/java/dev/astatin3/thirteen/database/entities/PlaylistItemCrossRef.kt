@@ -38,4 +38,5 @@ data class PlaylistItemCrossRef(
     @ColumnInfo(name = "playlist_id") val playlistId: Long,
     @ColumnInfo(name = "audio_uri", defaultValue = "") val audioUri: Uri,
     @ColumnInfo(name = "last_modified") val lastModified: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "sort_order", defaultValue = "0") val sortOrder: Int = 0,
 )

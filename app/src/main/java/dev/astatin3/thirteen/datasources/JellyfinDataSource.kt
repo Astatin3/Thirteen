@@ -621,6 +621,24 @@ class JellyfinDataSource(
         }
     }
 
+    override suspend fun reorderPlaylist(
+        playlistUri: Uri,
+        audioUris: List<Uri>,
+    ) = providersManager.doWithInstanceOf(playlistUri) {
+        when {
+            playlistUri == favoritesUri -> Result.Failure(Error.IO)
+            else -> {
+                val playlistId = UUID.fromString(playlistUri.lastPathSegment!!)
+                val orderedIds = audioUris.mapNotNull { uri ->
+                    uri.lastPathSegment?.let { UUID.fromString(it) }
+                }
+                client.reorderPlaylistItems(playlistId, orderedIds).map {
+                    onPlaylistsChanged()
+                }
+            }
+        }
+    }
+
     override suspend fun onAudioPlayed(
         audioUri: Uri,
         positionMs: Long,

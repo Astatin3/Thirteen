@@ -745,16 +745,23 @@ class MediaStoreDataSource(
             }
         }
 
-        else -> database.getPlaylistDao().getPlaylistWithItems(
-            ContentUris.parseId(playlistUri)
-        ).flatMapLatest { data ->
-            data?.let { playlistWithItems ->
-                val playlist = playlistWithItems.playlist.toModel()
+        else -> {
+            val playlistId = ContentUris.parseId(playlistUri)
 
-                audios(playlistWithItems.items).mapLatest { items ->
-                    Result.Success(playlist to items.filterNotNull())
-                }
-            } ?: flowOf(Result.Failure(Error.NOT_FOUND))
+            combine(
+                database.getPlaylistDao().getById(playlistId),
+                database.getPlaylistItemCrossRefDao().getOrderedItemUris(playlistId),
+            ) { playlistEntity, orderedUris ->
+                playlistEntity to orderedUris
+            }.flatMapLatest { (playlistEntity, orderedUris) ->
+                playlistEntity?.let {
+                    val playlist = it.toModel()
+
+                    audios(orderedUris).mapLatest { items ->
+                        Result.Success(playlist to items.filterNotNull())
+                    }
+                } ?: flowOf(Result.Failure(Error.NOT_FOUND))
+            }
         }
     }
 
@@ -822,6 +829,23 @@ class MediaStoreDataSource(
             ContentUris.parseId(playlistUri),
             audioUri
         ).let {
+            Result.Success(Unit)
+        }
+    }
+
+    override suspend fun reorderPlaylist(
+        playlistUri: Uri,
+        audioUris: List<Uri>,
+    ) = when {
+        playlistUri == favoritesUri -> Result.Failure(Error.IO)
+        else -> {
+            val playlistId = ContentUris.parseId(playlistUri)
+            val dao = database.getPlaylistItemCrossRefDao()
+
+            audioUris.forEachIndexed { index, audioUri ->
+                dao._setItemOrder(playlistId, audioUri, index)
+            }
+
             Result.Success(Unit)
         }
     }

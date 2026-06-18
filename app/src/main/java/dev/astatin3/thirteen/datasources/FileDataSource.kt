@@ -208,6 +208,11 @@ class FileDataSource(
         audioUri: Uri,
     ) = Result.Failure(Error.NOT_FOUND)
 
+    override suspend fun reorderPlaylist(
+        playlistUri: Uri,
+        audioUris: List<Uri>,
+    ) = Result.Failure(Error.NOT_IMPLEMENTED)
+
     override suspend fun onAudioPlayed(
         audioUri: Uri,
         positionMs: Long,

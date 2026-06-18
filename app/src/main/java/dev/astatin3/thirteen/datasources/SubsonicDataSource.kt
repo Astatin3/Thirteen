@@ -700,6 +700,21 @@ class SubsonicDataSource(
         }
     }
 
+    override suspend fun reorderPlaylist(
+        playlistUri: Uri,
+        audioUris: List<Uri>,
+    ) = providersManager.doWithInstanceOf(playlistUri) {
+        when {
+            playlistUri == favoritesUri -> Result.Failure(Error.IO)
+            else -> subsonicClient.createPlaylist(
+                playlistId = playlistUri.lastPathSegment!!,
+                songIds = audioUris.mapNotNull { it.lastPathSegment?.toIntOrNull() },
+            ).map {
+                onPlaylistsChanged()
+            }
+        }
+    }
+
     override suspend fun onAudioPlayed(
         audioUri: Uri,
         positionMs: Long,

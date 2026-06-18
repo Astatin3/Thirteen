@@ -679,6 +679,21 @@ class AmpacheDataSource(
         }
     }
 
+    override suspend fun reorderPlaylist(
+        playlistUri: Uri,
+        audioUris: List<Uri>,
+    ) = providersManager.doWithInstanceOf(playlistUri) {
+        when (playlistUri) {
+            favoritesUri -> Result.Failure(Error.IO)
+            else -> client.playlistEdit(
+                playlistUri.lastPathSegment!!,
+                items = audioUris.map { it.lastPathSegment!! },
+            ).map {
+                onPlaylistsChanged()
+            }
+        }
+    }
+
     override suspend fun onAudioPlayed(
         audioUri: Uri,
         positionMs: Long,

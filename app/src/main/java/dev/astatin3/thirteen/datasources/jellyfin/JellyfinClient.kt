@@ -15,6 +15,7 @@ import dev.astatin3.thirteen.datasources.jellyfin.models.Lyrics
 import dev.astatin3.thirteen.datasources.jellyfin.models.PlaybackStartInfo
 import dev.astatin3.thirteen.datasources.jellyfin.models.PlaylistItems
 import dev.astatin3.thirteen.datasources.jellyfin.models.QueryResult
+import dev.astatin3.thirteen.datasources.jellyfin.models.ReorderPlaylistRequest
 import dev.astatin3.thirteen.datasources.jellyfin.models.SystemInfo
 import dev.astatin3.thirteen.datasources.jellyfin.models.UpdatePlaylist
 import dev.astatin3.thirteen.models.SortingRule
@@ -246,6 +247,17 @@ class JellyfinClient(
             "EntryIds" to audioId,
         ),
     ).execute(api).mapToError()
+
+    suspend fun reorderPlaylistItems(id: UUID, orderedIds: List<UUID>) =
+        ApiRequest.post<ReorderPlaylistRequest, Unit>(
+            listOf(
+                "Playlists",
+                id.toString(),
+                "Items",
+                "Reorder",
+            ),
+            data = ReorderPlaylistRequest(orderedIds),
+        ).execute(api).mapToError()
 
     suspend fun getSystemInfo() = ApiRequest.get<SystemInfo>(
         listOf(

@@ -8,6 +8,7 @@ package dev.astatin3.thirteen.fragments
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -23,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -32,6 +34,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.Collections
 import dev.astatin3.thirteen.R
 import dev.astatin3.thirteen.ext.Bundle
 import dev.astatin3.thirteen.ext.getParcelable
@@ -86,13 +89,28 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
     private val renamePlaylistMenuItem get() = toolbar.menu.findItem(R.id.renamePlaylist)
 
     // Recyclerview
+    private var currentPlaylistAudios = listOf<Audio>()
+
     private val adapter by lazy {
         object : SimpleListAdapter<Audio, ListItem>(
             UniqueItemDiffCallback(),
             ::ListItem,
         ) {
+            override fun submitList(list: List<Audio>?) {
+                currentPlaylistAudios = list.orEmpty()
+                super.submitList(list)
+            }
+
             override fun ViewHolder.onPrepareView() {
                 view.setLeadingIconImage(R.drawable.ic_music_note)
+                view.setTrailingIconImage(R.drawable.ic_drag_handle)
+
+                view.findViewById<ImageView>(R.id.trailingIconImageView).setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        itemTouchHelper.startDrag(this)
+                    }
+                    false
+                }
             }
 
             override fun ViewHolder.onBindView(item: Audio) {
@@ -120,6 +138,37 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
             }
         }
     }
+    private val itemTouchHelperCallback by lazy {
+        object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+            0,
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean {
+                val from = viewHolder.bindingAdapterPosition
+                val to = target.bindingAdapterPosition
+
+                Collections.swap(currentPlaylistAudios, from, to)
+                recyclerView.adapter!!.notifyItemMoved(from, to)
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.reorderPlaylist(
+                        currentPlaylistAudios.map { audio -> audio.uri }
+                    )
+                }
+
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
+            override fun isLongPressDragEnabled() = false
+        }
+    }
+    private val itemTouchHelper by lazy { ItemTouchHelper(itemTouchHelperCallback) }
 
     // Arguments
     private val playlistUri: Uri
@@ -213,6 +262,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
         }
 
         recyclerView.adapter = adapter
+        itemTouchHelper.attachToRecyclerView(recyclerView)
 
         playAllExtendedFloatingActionButton.setOnClickListener {
             viewModel.playPlaylist()
@@ -234,6 +284,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
     }
 
     override fun onDestroyView() {
+        itemTouchHelper.attachToRecyclerView(null)
         recyclerView.adapter = null
 
         super.onDestroyView()

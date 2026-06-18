@@ -72,6 +72,14 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
         }
     }
 
+    suspend fun reorderPlaylist(audioUris: List<Uri>) {
+        playlistUri.value?.let { playlistUri ->
+            withContext(Dispatchers.IO) {
+                mediaRepository.reorderPlaylist(playlistUri, audioUris)
+            }
+        }
+    }
+
     fun playPlaylist(position: Int = 0) {
         playlist.value.getOrNull()?.second?.takeUnless {
             it.isEmpty()

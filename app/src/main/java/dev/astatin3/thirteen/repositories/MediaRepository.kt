@@ -345,6 +345,14 @@ class MediaRepository(
         }
 
     /**
+     * @see MediaDataSource.reorderPlaylist
+     */
+    suspend fun reorderPlaylist(playlistUri: Uri, audioUris: List<Uri>) =
+        withMediaItemsDataSource(playlistUri) {
+            reorderPlaylist(playlistUri, audioUris)
+        }
+
+    /**
      * @see MediaDataSource.onAudioPlayed
      */
     suspend fun onAudioPlayed(audioUri: Uri, positionMs: Long) =

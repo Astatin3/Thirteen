@@ -18,7 +18,10 @@ abstract class PlaylistWithItemsDao(database: ThirteenDatabase) {
      * Add an item to a playlist (creates a cross-reference).
      */
     open suspend fun addItemToPlaylist(playlistId: Long, audioUri: Uri) =
-        playlistItemCrossRefDao._addItemToPlaylist(playlistId, audioUri)
+        playlistItemCrossRefDao._addItemToPlaylist(
+            playlistId, audioUri,
+            sortOrder = playlistItemCrossRefDao._getNextSortOrder(playlistId),
+        )
 
     /**
      * Remove an item from a playlist (deletes the cross-reference) and delete the item if it's the

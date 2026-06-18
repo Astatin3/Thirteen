@@ -217,6 +217,14 @@ interface MediaDataSource {
     suspend fun removeAudioFromPlaylist(playlistUri: Uri, audioUri: Uri): MediaRequestStatus<Unit>
 
     /**
+     * Reorder the items in a playlist.
+     * @param playlistUri The URI of the playlist
+     * @param audioUris The URIs of the audios in the new order
+     * @return [Result.Success] if success, [Result.Failure] with an error otherwise
+     */
+    suspend fun reorderPlaylist(playlistUri: Uri, audioUris: List<Uri>): MediaRequestStatus<Unit>
+
+    /**
      * Notify the source about an audio item being played.
      * @param audioUri The URI of the audio
      * @param positionMs The position of the audio in milliseconds

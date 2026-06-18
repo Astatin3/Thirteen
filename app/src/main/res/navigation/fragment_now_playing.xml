@@ -11,7 +11,7 @@
 
     <fragment
         android:id="@+id/nowPlayingFragment"
-        android:name="org.lineageos.twelve.fragments.NowPlayingFragment"
+        android:name="dev.astatin3.thirteen.fragments.NowPlayingFragment"
         tools:layout="@layout/fragment_now_playing">
 
         <action

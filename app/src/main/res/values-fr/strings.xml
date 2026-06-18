@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">Musique</string>
+    <string name="app_name">thirteen</string>
     <string name="app_permissions_toast">Autorisations non accordées par l\'utilisateur.</string>
     <string name="visualizer_permissions_toast">L\'autorisation d\'enregistrement audio est requise pour le visualiseur.</string>
     <string name="main_fragment_section_activity">Activité</string>

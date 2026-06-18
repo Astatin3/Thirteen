@@ -11,11 +11,11 @@ plugins {
 }
 
 android {
-    namespace = "org.lineageos.twelve"
+    namespace = "dev.astatin3.thirteen"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.lineageos.twelve"
+        applicationId = "dev.astatin3.thirteen"
         minSdk = 30
         targetSdk = 36
         versionCode = 1

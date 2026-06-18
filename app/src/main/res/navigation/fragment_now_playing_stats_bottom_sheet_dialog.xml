@@ -11,7 +11,7 @@
 
     <dialog
         android:id="@+id/nowPlayingStatsBottomSheetDialogFragment"
-        android:name="org.lineageos.twelve.fragments.NowPlayingStatsBottomSheetDialogFragment"
+        android:name="dev.astatin3.thirteen.fragments.NowPlayingStatsBottomSheetDialogFragment"
         tools:layout="@layout/fragment_now_playing_stats_bottom_sheet_dialog" />
 
 </navigation>

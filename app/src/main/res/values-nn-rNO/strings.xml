@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">Musikk</string>
+    <string name="app_name">thirteen</string>
     <string name="app_permissions_toast">Brukaren gav ikkje løyve.</string>
     <string name="visualizer_permissions_toast">Det trengst løyve til lydopptak for å bruka visualiseringa.</string>
     <string name="main_fragment_section_activity">Hendingar</string>

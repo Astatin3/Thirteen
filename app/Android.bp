@@ -8,7 +8,7 @@ package {
 }
 
 android_app {
-    name: "Twelve",
+    name: "Thirteen",
 
     srcs: ["src/main/java/**/*.kt"],
     resource_dirs: ["src/main/res"],
@@ -32,15 +32,15 @@ android_app {
     ],
 
     required: [
-        "initial-package-stopped-states-org.lineageos.twelve",
-        "preinstalled-packages-org.lineageos.twelve",
+        "initial-package-stopped-states-dev.astatin3.thirteen",
+        "preinstalled-packages-dev.astatin3.thirteen",
     ],
 
     plugins: [
         "androidx.room_room-compiler-plugin",
     ],
     javacflags: [
-        "-Aroom.schemaLocation=packages/apps/Twelve/app/schemas",
+        "-Aroom.schemaLocation=packages/apps/Thirteen/app/schemas",
     ],
 
     kotlin_plugins: [
@@ -59,14 +59,14 @@ android_app {
         "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.lifecycle_lifecycle-service",
         "androidx.lifecycle_lifecycle-viewmodel-savedstate",
-        "Twelve_androidx.media3_media3-common-ktx",
-        "Twelve_androidx.media3_media3-exoplayer",
-        "Twelve_androidx.media3_media3-exoplayer-hls",
-        "Twelve_androidx.media3_media3-exoplayer-midi",
-        "Twelve_androidx.media3_media3-exoplayer-rtsp",
-        "Twelve_androidx.media3_media3-exoplayer-smoothstreaming",
-        "Twelve_androidx.media3_media3-session",
-        "Twelve_androidx.media3_media3-ui",
+        "Thirteen_androidx.media3_media3-common-ktx",
+        "Thirteen_androidx.media3_media3-exoplayer",
+        "Thirteen_androidx.media3_media3-exoplayer-hls",
+        "Thirteen_androidx.media3_media3-exoplayer-midi",
+        "Thirteen_androidx.media3_media3-exoplayer-rtsp",
+        "Thirteen_androidx.media3_media3-exoplayer-smoothstreaming",
+        "Thirteen_androidx.media3_media3-session",
+        "Thirteen_androidx.media3_media3-ui",
         "androidx.navigation_navigation-common",
         "androidx.navigation_navigation-fragment-ktx",
         "androidx.navigation_navigation-runtime",
@@ -80,14 +80,14 @@ android_app {
         "androidx.sqlite_sqlite",
         "androidx.sqlite_sqlite-framework",
         "androidx.viewpager2_viewpager2",
-        "Twelve_com.github.bogerchan_Nier-Visualizer",
-        "Twelve_com.google.android.material_material",
-        "Twelve_com.squareup.okhttp3_okhttp",
-        "Twelve_io.coil-kt.coil3_coil",
-        "Twelve_io.coil-kt.coil3_coil-android",
-        "Twelve_io.coil-kt.coil3_coil-core-android",
-        "Twelve_io.coil-kt.coil3_coil-network-core-android",
-        "Twelve_io.coil-kt.coil3_coil-network-okhttp",
+        "Thirteen_com.github.bogerchan_Nier-Visualizer",
+        "Thirteen_com.google.android.material_material",
+        "Thirteen_com.squareup.okhttp3_okhttp",
+        "Thirteen_io.coil-kt.coil3_coil",
+        "Thirteen_io.coil-kt.coil3_coil-android",
+        "Thirteen_io.coil-kt.coil3_coil-core-android",
+        "Thirteen_io.coil-kt.coil3_coil-network-core-android",
+        "Thirteen_io.coil-kt.coil3_coil-network-okhttp",
         "kotlin-stdlib",
         "kotlinx_coroutines_guava",
         "kotlinx_serialization_json",
@@ -101,17 +101,17 @@ android_app {
 }
 
 prebuilt_etc {
-    name: "initial-package-stopped-states-org.lineageos.twelve",
+    name: "initial-package-stopped-states-dev.astatin3.thirteen",
     product_specific: true,
     sub_dir: "sysconfig",
-    src: "initial-package-stopped-states-org.lineageos.twelve.xml",
+    src: "initial-package-stopped-states-dev.astatin3.thirteen.xml",
     filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "preinstalled-packages-org.lineageos.twelve",
+    name: "preinstalled-packages-dev.astatin3.thirteen",
     product_specific: true,
     sub_dir: "sysconfig",
-    src: "preinstalled-packages-org.lineageos.twelve.xml",
+    src: "preinstalled-packages-dev.astatin3.thirteen.xml",
     filename_from_src: true,
 }

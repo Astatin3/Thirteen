@@ -11,7 +11,7 @@
 
     <dialog
         android:id="@+id/playbackControlBottomSheetDialogFragment"
-        android:name="org.lineageos.twelve.fragments.PlaybackControlBottomSheetDialogFragment"
+        android:name="dev.astatin3.thirteen.fragments.PlaybackControlBottomSheetDialogFragment"
         tools:layout="@layout/fragment_playback_control_bottom_sheet_dialog" />
 
 </navigation>

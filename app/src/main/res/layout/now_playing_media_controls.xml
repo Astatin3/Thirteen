@@ -11,19 +11,19 @@
     android:orientation="horizontal">
 
     <FrameLayout
-        style="@style/Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary.Container"
+        style="@style/Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary.Container"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/shuffleMarkerImageView"
-            style="@style/Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary.Marker"
+            style="@style/Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary.Marker"
             android:importantForAccessibility="no" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/shuffleMaterialButton"
-            style="@style/Theme.Twelve.NowPlayingFragment.MediaButton.Standard"
+            style="@style/Theme.Thirteen.NowPlayingFragment.MediaButton.Standard"
             app:icon="@drawable/ic_shuffle" />
 
     </FrameLayout>
@@ -66,19 +66,19 @@
     </com.google.android.material.button.MaterialButtonGroup>
 
     <FrameLayout
-        style="@style/Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary.Container"
+        style="@style/Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary.Container"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/repeatMarkerImageView"
-            style="@style/Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary.Marker"
+            style="@style/Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary.Marker"
             android:importantForAccessibility="no" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/repeatMaterialButton"
-            style="@style/Theme.Twelve.NowPlayingFragment.MediaButton.Standard"
+            style="@style/Theme.Thirteen.NowPlayingFragment.MediaButton.Standard"
             app:icon="@drawable/ic_repeat" />
 
     </FrameLayout>

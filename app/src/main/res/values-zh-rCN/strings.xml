@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">音乐</string>
+    <string name="app_name">thirteen</string>
     <string name="app_permissions_toast">用户没有授予权限。</string>
     <string name="visualizer_permissions_toast">可视化需要录音权限</string>
     <string name="main_fragment_section_activity">活动</string>

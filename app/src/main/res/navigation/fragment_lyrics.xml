@@ -11,7 +11,7 @@
 
     <fragment
         android:id="@+id/lyricsFragment"
-        android:name="org.lineageos.twelve.fragments.LyricsFragment"
+        android:name="dev.astatin3.thirteen.fragments.LyricsFragment"
         android:label="@string/lyrics"
         tools:layout="@layout/fragment_lyrics" />
 

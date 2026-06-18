@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">Hudba</string>
+    <string name="app_name">thirteen</string>
     <string name="app_permissions_toast">Oprávnění neudělena uživatelem.</string>
     <string name="visualizer_permissions_toast">Pro vizualizér je vyžadováno oprávnění nahrávat zvuk.</string>
     <string name="main_fragment_section_activity">Aktivita</string>

@@ -4,7 +4,7 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-    <string name="app_name">Musiqi</string>
+    <string name="app_name">thirteen</string>
     <string name="app_permissions_toast">İstifadəçi tərəfindən verilməyən icazələr.</string>
     <string name="visualizer_permissions_toast">Vizuallaşdırıcı üçün səs yazma icazəsi tələb olunur.</string>
     <string name="main_fragment_section_activity">Fəaliyyət</string>

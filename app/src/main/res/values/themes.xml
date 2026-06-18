@@ -5,7 +5,7 @@
 -->
 <resources>
     <!-- Application theme -->
-    <style name="Theme.Twelve" parent="Theme.Material3Expressive.DayNight.NoActionBar">
+    <style name="Theme.Thirteen" parent="Theme.Material3Expressive.DayNight.NoActionBar">
         <item name="android:enforceNavigationBarContrast">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="enableEdgeToEdge">true</item>
@@ -13,10 +13,10 @@
     </style>
 
     <!-- Base dialog theme -->
-    <style name="BaseTheme.Twelve.Dialog" parent="Theme.Material3Expressive.Light.Dialog.Alert" />
+    <style name="BaseTheme.Thirteen.Dialog" parent="Theme.Material3Expressive.Light.Dialog.Alert" />
 
     <!-- Dialog theme -->
-    <style name="Theme.Twelve.Dialog" parent="BaseTheme.Twelve.Dialog">
+    <style name="Theme.Thirteen.Dialog" parent="BaseTheme.Thirteen.Dialog">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
@@ -26,27 +26,27 @@
     </style>
 
     <!-- No elements styles -->
-    <style name="Theme.Twelve.NoElements" />
+    <style name="Theme.Thirteen.NoElements" />
 
-    <style name="Theme.Twelve.NoElements.LinearLayout">
+    <style name="Theme.Thirteen.NoElements.LinearLayout">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:orientation">vertical</item>
     </style>
 
-    <style name="Theme.Twelve.NoElements.ImageView">
+    <style name="Theme.Thirteen.NoElements.ImageView">
         <item name="android:layout_width">72dp</item>
         <item name="android:layout_height">72dp</item>
         <item name="tint">?attr/colorOnSurface</item>
     </style>
 
-    <style name="Theme.Twelve.NoElements.Space">
+    <style name="Theme.Thirteen.NoElements.Space">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">8dp</item>
     </style>
 
-    <style name="Theme.Twelve.NoElements.TextView" parent="Widget.AppCompat.TextView">
+    <style name="Theme.Thirteen.NoElements.TextView" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
@@ -54,7 +54,7 @@
     </style>
 
     <!-- Now playing fragment -->
-    <style name="Theme.Twelve.NowPlayingFragment.MediaButton.Primary" parent="Widget.Material3Expressive.Button.IconButton">
+    <style name="Theme.Thirteen.NowPlayingFragment.MediaButton.Primary" parent="Widget.Material3Expressive.Button.IconButton">
         <item name="android:layout_width">72dp</item>
         <item name="android:layout_height">72dp</item>
         <item name="android:padding">0dp</item>
@@ -62,7 +62,7 @@
         <item name="iconSize">36dp</item>
     </style>
 
-    <style name="Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary" parent="Widget.Material3Expressive.Button.IconButton">
+    <style name="Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary" parent="Widget.Material3Expressive.Button.IconButton">
         <item name="android:layout_width">72dp</item>
         <item name="android:layout_height">72dp</item>
         <item name="android:padding">0dp</item>
@@ -75,7 +75,7 @@
         </item>
     </style>
 
-    <style name="Theme.Twelve.NowPlayingFragment.MediaButton.Standard" parent="Widget.Material3Expressive.Button.IconButton.Standard">
+    <style name="Theme.Thirteen.NowPlayingFragment.MediaButton.Standard" parent="Widget.Material3Expressive.Button.IconButton.Standard">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:layout_gravity">center</item>
@@ -84,12 +84,12 @@
         <item name="iconSize">24dp</item>
     </style>
 
-    <style name="Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary.Container" parent="">
+    <style name="Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary.Container" parent="">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">56dp</item>
     </style>
 
-    <style name="Theme.Twelve.NowPlayingFragment.MediaButton.Tertiary.Marker" parent="">
+    <style name="Theme.Thirteen.NowPlayingFragment.MediaButton.Tertiary.Marker" parent="">
         <item name="android:layout_width">8dp</item>
         <item name="android:layout_height">8dp</item>
         <item name="android:layout_gravity">bottom|center_horizontal</item>
@@ -98,7 +98,7 @@
         <item name="tint">?attr/colorPrimary</item>
     </style>
 
-    <style name="Theme.Twelve.NowPlayingFragment.BottomBarButton" parent="Widget.Material3Expressive.Button.IconButton.Tonal">
+    <style name="Theme.Thirteen.NowPlayingFragment.BottomBarButton" parent="Widget.Material3Expressive.Button.IconButton.Tonal">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:layout_gravity">center</item>
@@ -110,7 +110,7 @@
     </style>
 
     <!-- App widget -->
-    <style name="Theme.Twelve.AppWidgetContainer" parent="Theme.Material3Expressive.DynamicColors.DayNight">
+    <style name="Theme.Thirteen.AppWidgetContainer" parent="Theme.Material3Expressive.DynamicColors.DayNight">
         <item name="appWidgetRadius">28dp</item>
     </style>
 </resources>

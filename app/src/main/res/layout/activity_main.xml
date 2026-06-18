@@ -20,7 +20,7 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/fragment_main" />
 
-    <org.lineageos.twelve.ui.views.NowPlayingBar
+    <dev.astatin3.thirteen.ui.views.NowPlayingBar
         android:id="@+id/nowPlayingBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

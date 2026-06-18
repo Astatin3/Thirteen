@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 version = 1
-SPDX-PackageName = "Twelve"
+SPDX-PackageName = "Thirteen"
 SPDX-PackageSupplier = "The LineageOS Project"
-SPDX-PackageDownloadLocation = "https://github.com/LineageOS/android_packages_apps_Twelve"
+SPDX-PackageDownloadLocation = "https://github.com/LineageOS/android_packages_apps_Thirteen"
 
 [[annotations]]
-path = [".github/workflows/**", ".gitignore", "app/.gitignore", "app/schemas/org.lineageos.twelve.database.TwelveDatabase/*.json"]
+path = [".github/workflows/**", ".gitignore", "app/.gitignore", "app/schemas/dev.astatin3.thirteen.database.ThirteenDatabase/*.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "The LineageOS Project"
 SPDX-License-Identifier = "Apache-2.0"

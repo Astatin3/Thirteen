@@ -5,5 +5,5 @@
 -->
 <resources>
     <!-- Base dialog theme -->
-    <style name="BaseTheme.Twelve.Dialog" parent="Theme.Material3Expressive.Dark.Dialog.Alert" />
+    <style name="BaseTheme.Thirteen.Dialog" parent="Theme.Material3Expressive.Dark.Dialog.Alert" />
 </resources>

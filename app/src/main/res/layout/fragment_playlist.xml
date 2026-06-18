@@ -108,7 +108,7 @@
         app:layout_anchorGravity="bottom|end"
         app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
 
-    <org.lineageos.twelve.ui.views.FullscreenLoadingProgressBar
+    <dev.astatin3.thirteen.ui.views.FullscreenLoadingProgressBar
         android:id="@+id/fullscreenLoadingProgressBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -107,6 +107,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
 
             override fun ViewHolder.onPrepareView() {
                 view.setLeadingIconImage(R.drawable.ic_music_note)
+                view.setTrailingIconImage(R.drawable.ic_drag_handle)
             }
 
             override fun ViewHolder.onBindView(item: Audio) {

@@ -5,6 +5,7 @@
 
 package dev.astatin3.thirteen.fragments
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -38,7 +39,6 @@ import dev.astatin3.thirteen.R
 import dev.astatin3.thirteen.ext.Bundle
 import dev.astatin3.thirteen.ext.getParcelable
 import dev.astatin3.thirteen.ext.getViewProperty
-import dev.astatin3.thirteen.ext.loadThumbnail
 import dev.astatin3.thirteen.ext.navigateSafe
 import dev.astatin3.thirteen.ext.setProgressCompat
 import dev.astatin3.thirteen.ext.updatePadding
@@ -334,9 +334,8 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
                         toolbar.title = playlistName
                         playlistNameTextView.text = playlistName
 
-                        thumbnailImageView.loadThumbnail(
-                            playlist.thumbnail,
-                            placeholder = when (playlist.type) {
+                        thumbnailImageView.setImageResource(
+                            when (playlist.type) {
                                 Playlist.Type.PLAYLIST -> R.drawable.ic_playlist_play
                                 Playlist.Type.FAVORITES -> R.drawable.ic_favorite
                             }
@@ -409,6 +408,14 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
             viewModel.playlistMetadataCanBeEdited.collectLatest { playlistMetadataCanBeEdited ->
                 renamePlaylistMenuItem.isVisible = playlistMetadataCanBeEdited
                 deletePlaylistMenuItem.isVisible = playlistMetadataCanBeEdited
+            }
+        }
+
+        launch {
+            viewModel.compositeThumbnail.collectLatest { bitmap ->
+                if (bitmap != null) {
+                    thumbnailImageView.setImageBitmap(bitmap)
+                }
             }
         }
     }

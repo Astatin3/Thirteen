@@ -33,6 +33,7 @@ import dev.astatin3.thirteen.models.FlowResult.Companion.mapLatestData
 import dev.astatin3.thirteen.models.FlowResult.Companion.mapLatestDataOrNull
 import dev.astatin3.thirteen.models.MediaType
 import dev.astatin3.thirteen.models.Playlist
+import dev.astatin3.thirteen.models.PlaylistThumbnailCompositor
 import dev.astatin3.thirteen.models.Result
 import dev.astatin3.thirteen.models.Result.Companion.map
 
@@ -213,6 +214,32 @@ class MediaItemViewModel(application: Application) : ThirteenViewModel(applicati
             }
         }
         .combine(fromGenre) { uri, fromGenre -> uri?.takeIf { !fromGenre } }
+        .flowOn(Dispatchers.IO)
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null,
+        )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val compositeThumbnail = combine(
+        mediaType.filterNotNull(),
+        tracks,
+    ) { type, trks ->
+        if (type == MediaType.PLAYLIST && trks.isNotEmpty()) {
+            val thumbnails = trks
+                .distinctBy { it.albumUri ?: it.albumTitle ?: it.uri }
+                .mapNotNull { it.thumbnail }
+                .take(4)
+            if (thumbnails.isNotEmpty()) {
+                try {
+                    PlaylistThumbnailCompositor.composite(getApplication(), thumbnails)
+                } catch (_: Exception) {
+                    null
+                }
+            } else null
+        } else null
+    }
         .flowOn(Dispatchers.IO)
         .stateIn(
             viewModelScope,

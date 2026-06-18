@@ -5,7 +5,6 @@
 
 package dev.astatin3.thirteen.fragments
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,13 +13,16 @@ import android.widget.LinearLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -29,13 +31,14 @@ import dev.astatin3.thirteen.R
 import dev.astatin3.thirteen.ext.getViewProperty
 import dev.astatin3.thirteen.ext.navigateSafe
 import dev.astatin3.thirteen.ext.setProgressCompat
-import dev.astatin3.thirteen.ext.updatePadding
+import dev.astatin3.thirteen.ext.toPx
 import dev.astatin3.thirteen.models.FlowResult
 import dev.astatin3.thirteen.models.Playlist
+import dev.astatin3.thirteen.models.PlaylistItem
 import dev.astatin3.thirteen.models.SortingStrategy
+import dev.astatin3.thirteen.ui.recyclerview.DisplayAwareGridLayoutManager
 import dev.astatin3.thirteen.ui.recyclerview.SimpleListAdapter
-import dev.astatin3.thirteen.ui.recyclerview.UniqueItemDiffCallback
-import dev.astatin3.thirteen.ui.views.ListItem
+import dev.astatin3.thirteen.ui.views.PlaylistGridItemView
 import dev.astatin3.thirteen.ui.views.SortingChip
 import dev.astatin3.thirteen.utils.PermissionsChecker
 import dev.astatin3.thirteen.utils.PermissionsUtils
@@ -49,6 +52,7 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
     private val viewModel by viewModels<PlaylistsViewModel>()
 
     // Views
+    private val createNewPlaylistFab by getViewProperty<FloatingActionButton>(R.id.createNewPlaylistFab)
     private val createNewPlaylistButton by getViewProperty<Button>(R.id.createNewPlaylistButton)
     private val linearProgressIndicator by getViewProperty<LinearProgressIndicator>(R.id.linearProgressIndicator)
     private val noElementsLinearLayout by getViewProperty<LinearLayout>(R.id.noElementsLinearLayout)
@@ -56,56 +60,39 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
     private val sortingChip by getViewProperty<SortingChip>(R.id.sortingChip)
 
     // Recyclerview
-    private val addNewPlaylistItem = Playlist.Builder(Uri.EMPTY).build()
-    private val adapter = object : SimpleListAdapter<Playlist, ListItem>(
-        UniqueItemDiffCallback(),
-        ::ListItem,
-    ) {
-        override fun ViewHolder.onBindView(item: Playlist) {
-            when (item === addNewPlaylistItem) {
-                true -> {
-                    view.setOnClickListener {
-                        findNavController().navigateSafe(
-                            R.id.action_mainFragment_to_fragment_create_playlist_dialog,
-                            CreatePlaylistDialogFragment.createBundle(
-                                providerIdentifier = viewModel.navigationProvider.value?.identifier
-                            )
-                        )
-                    }
-                    view.setOnLongClickListener(null)
-
-                    view.setLeadingIconImage(R.drawable.ic_playlist_add)
-                    view.setHeadlineText(R.string.create_playlist)
-                }
-
-                false -> {
-                    view.setOnClickListener {
-                        findNavController().navigateSafe(
-                            R.id.action_mainFragment_to_fragment_playlist,
-                            PlaylistFragment.createBundle(item.uri)
-                        )
-                    }
-                    view.setOnLongClickListener {
-                        findNavController().navigateSafe(
-                            R.id.action_mainFragment_to_fragment_media_item_bottom_sheet_dialog,
-                            MediaItemBottomSheetDialogFragment.createBundle(item.uri)
-                        )
-                        true
-                    }
-
-                    view.setLeadingIconImage(
-                        when (item.type) {
-                            Playlist.Type.PLAYLIST -> R.drawable.ic_playlist_play
-                            Playlist.Type.FAVORITES -> R.drawable.ic_favorite
-                        }
-                    )
-                    view.headlineText = item.name ?: getString(
-                        when (item.type) {
-                            Playlist.Type.PLAYLIST -> R.string.playlist_unknown
-                            Playlist.Type.FAVORITES -> R.string.favorites_playlist
-                        }
+    private val adapter by lazy {
+        object : SimpleListAdapter<PlaylistItem, PlaylistGridItemView>(
+            playlistDiffCallback,
+            ::PlaylistGridItemView,
+        ) {
+            override fun ViewHolder.onBindView(item: PlaylistItem) {
+                view.setOnClickListener {
+                    findNavController().navigateSafe(
+                        R.id.action_mainFragment_to_fragment_playlist,
+                        PlaylistFragment.createBundle(item.playlist.uri)
                     )
                 }
+                view.setOnLongClickListener {
+                    findNavController().navigateSafe(
+                        R.id.action_mainFragment_to_fragment_media_item_bottom_sheet_dialog,
+                        MediaItemBottomSheetDialogFragment.createBundle(item.playlist.uri)
+                    )
+                    true
+                }
+
+                view.headlineText = item.playlist.name ?: getString(
+                    when (item.playlist.type) {
+                        Playlist.Type.PLAYLIST -> R.string.playlist_unknown
+                        Playlist.Type.FAVORITES -> R.string.favorites_playlist
+                    }
+                )
+                view.setThumbnail(
+                    item.compositeBitmap?.bitmap,
+                    when (item.playlist.type) {
+                        Playlist.Type.PLAYLIST -> R.drawable.ic_playlist_play
+                        Playlist.Type.FAVORITES -> R.drawable.ic_favorite
+                    }
+                )
             }
         }
     }
@@ -124,11 +111,11 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
 
+            val padding = v.toPx(8)
             v.updatePadding(
-                insets,
-                start = true,
-                end = true,
-                bottom = true,
+                left = insets.left + padding,
+                right = insets.right + padding,
+                bottom = insets.bottom + padding,
             )
 
             windowInsets
@@ -146,9 +133,10 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
             viewModel.setSortingRule(it)
         }
 
+        recyclerView.layoutManager = DisplayAwareGridLayoutManager(recyclerView.context, 2)
         recyclerView.adapter = adapter
 
-        createNewPlaylistButton.setOnClickListener {
+        val navigateToCreatePlaylist = {
             findNavController().navigateSafe(
                 R.id.action_mainFragment_to_fragment_create_playlist_dialog,
                 CreatePlaylistDialogFragment.createBundle(
@@ -156,6 +144,9 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
                 )
             )
         }
+
+        createNewPlaylistFab.setOnClickListener { navigateToCreatePlaylist() }
+        createNewPlaylistButton.setOnClickListener { navigateToCreatePlaylist() }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -168,6 +159,7 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
 
     override fun onDestroyView() {
         recyclerView.adapter = null
+        recyclerView.layoutManager = null
 
         super.onDestroyView()
     }
@@ -175,27 +167,17 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
     private suspend fun loadData() {
         coroutineScope {
             launch {
-                viewModel.playlists.collectLatest {
+                viewModel.playlistItems.collectLatest {
                     linearProgressIndicator.setProgressCompat(it)
 
                     when (it) {
                         is FlowResult.Loading -> {
-                            // Do nothing
                         }
 
                         is FlowResult.Success -> {
+                            adapter.submitList(it.data)
+
                             val isEmpty = it.data.isEmpty()
-
-                            adapter.submitList(
-                                when (isEmpty) {
-                                    true -> emptyList()
-                                    false -> listOf(
-                                        addNewPlaylistItem,
-                                        *it.data.toTypedArray(),
-                                    )
-                                }
-                            )
-
                             recyclerView.isVisible = !isEmpty
                             noElementsLinearLayout.isVisible = isEmpty
                         }
@@ -226,5 +208,18 @@ class PlaylistsFragment : Fragment(R.layout.fragment_playlists) {
 
     companion object {
         private val LOG_TAG = PlaylistsFragment::class.simpleName!!
+
+        private val playlistDiffCallback = object : DiffUtil.ItemCallback<PlaylistItem>() {
+            override fun areItemsTheSame(
+                oldItem: PlaylistItem,
+                newItem: PlaylistItem,
+            ) = oldItem.playlist.uri == newItem.playlist.uri
+
+            override fun areContentsTheSame(
+                oldItem: PlaylistItem,
+                newItem: PlaylistItem,
+            ) = oldItem.playlist.areContentsTheSame(newItem.playlist) &&
+                oldItem.compositeBitmap?.bitmap == newItem.compositeBitmap?.bitmap
+        }
     }
 }

@@ -11,13 +11,19 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import dev.astatin3.thirteen.R
 import dev.astatin3.thirteen.ext.buildMediaItem
 import dev.astatin3.thirteen.ext.permissionsGranted
+import dev.astatin3.thirteen.ext.toByteArray
 import dev.astatin3.thirteen.models.MediaType
+import dev.astatin3.thirteen.models.Playlist
+import dev.astatin3.thirteen.models.PlaylistThumbnailCompositor
 import dev.astatin3.thirteen.models.Provider
 import dev.astatin3.thirteen.models.ProviderIdentifier
 import dev.astatin3.thirteen.models.ProviderType
@@ -223,8 +229,13 @@ class MediaRepositoryTree(
             it.toMedia3MediaItem(context.resources)
         }
 
-        PLAYLISTS_MEDIA_ITEM_ID -> repository.playlists().toOneShotResult().map {
-            it.toMedia3MediaItem(context.resources)
+        PLAYLISTS_MEDIA_ITEM_ID -> {
+            val playlists = repository.playlists().toOneShotResult() ?: emptyList()
+            coroutineScope {
+                playlists.map { playlist ->
+                    async { buildPlaylistMedia3Item(playlist) }
+                }.awaitAll()
+            }
         }
 
         CHANGE_PROVIDER_MEDIA_ITEM_ID -> providersRepository.allProviders.first().map {
@@ -408,6 +419,39 @@ class MediaRepositoryTree(
         return providersRepository.provider(
             ProviderIdentifier(providerType, providerTypeId)
         ).first()
+    }
+
+    /**
+     * Build a [MediaItem] for a [Playlist] with composite album art artwork.
+     */
+    private suspend fun buildPlaylistMedia3Item(playlist: Playlist): MediaItem {
+        val songs = repository.playlist(playlist.uri).toOneShotResult()?.second ?: emptyList()
+        val thumbnails = songs
+            .distinctBy { it.albumUri ?: it.albumTitle ?: it.uri }
+            .mapNotNull { it.thumbnail }
+            .take(4)
+
+        val composite = if (thumbnails.isNotEmpty()) {
+            PlaylistThumbnailCompositor.composite(context, thumbnails)
+        } else null
+
+        val title = playlist.name ?: context.getString(
+            when (playlist.type) {
+                Playlist.Type.PLAYLIST -> R.string.playlist_unknown
+                Playlist.Type.FAVORITES -> R.string.favorites_playlist
+            }
+        )
+
+        return buildMediaItem(
+            title = title,
+            mediaId = playlist.uri.toString(),
+            isPlayable = false,
+            isBrowsable = true,
+            mediaType = MediaMetadata.MEDIA_TYPE_PLAYLIST,
+            sourceUri = playlist.uri,
+            artworkData = composite?.toByteArray(),
+            artworkType = MediaMetadata.PICTURE_TYPE_FRONT_COVER,
+        )
     }
 
     companion object {

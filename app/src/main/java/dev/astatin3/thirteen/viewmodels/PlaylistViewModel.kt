@@ -6,6 +6,7 @@
 package dev.astatin3.thirteen.viewmodels
 
 import android.app.Application
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,6 +27,7 @@ import dev.astatin3.thirteen.models.FlowResult.Companion.asFlowResult
 import dev.astatin3.thirteen.models.FlowResult.Companion.foldLatest
 import dev.astatin3.thirteen.models.FlowResult.Companion.getOrNull
 import dev.astatin3.thirteen.models.Playlist
+import dev.astatin3.thirteen.models.PlaylistThumbnailCompositor
 
 class PlaylistViewModel(application: Application) : ThirteenViewModel(application) {
     private val playlistUri = MutableStateFlow<Uri?>(null)
@@ -53,6 +56,33 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
             viewModelScope,
             SharingStarted.WhileSubscribed(),
             false
+        )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val compositeThumbnail = playlist
+        .mapLatest { result ->
+            when (result) {
+                is FlowResult.Success -> {
+                    val audios = result.data.second
+                    val thumbnails = audios
+                        .distinctBy { it.albumUri ?: it.albumTitle ?: it.uri }
+                        .mapNotNull { it.thumbnail }
+                        .take(4)
+                    if (thumbnails.isNotEmpty()) {
+                        try {
+                            PlaylistThumbnailCompositor.composite(getApplication(), thumbnails)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    } else null
+                }
+                else -> null
+            }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(),
+            null
         )
 
     fun loadPlaylist(playlistUri: Uri) {

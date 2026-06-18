@@ -101,6 +101,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 }
 
                 navigationBarView.menu[position + offset].isChecked = true
+                playRandomSongsExtendedFloatingActionButton.isVisible = position == 1
             }
         }
     }
@@ -350,6 +351,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 }
             }
         }
+        playRandomSongsExtendedFloatingActionButton.isVisible = false
 
         // View pager
         viewPager2.isUserInputEnabled = false

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     SPDX-FileCopyrightText: The LineageOS Project
-     SPDX-License-Identifier: Apache-2.0
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -31,9 +28,14 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp"
             android:visibility="gone"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="1" />
+            tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/item_playlist_grid"
+            tools:spanCount="2"
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/noElementsLinearLayout"
@@ -66,6 +68,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/createNewPlaylistFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/create_playlist"
+            android:src="@drawable/ic_playlist_add"
+            android:visibility="visible"
+            app:fabSize="normal" />
 
     </FrameLayout>
 

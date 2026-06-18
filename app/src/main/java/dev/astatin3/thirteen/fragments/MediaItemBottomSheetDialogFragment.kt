@@ -330,6 +330,16 @@ class MediaItemBottomSheetDialogFragment : ThirteenBottomSheetDialogFragment(
                 openGenreListItem.isVisible = genreUri != null
             }
         }
+
+        launch {
+            viewModel.compositeThumbnail.collectLatest { bitmap ->
+                if (bitmap != null) {
+                    thumbnailImageView.setImageBitmap(bitmap)
+                    placeholderImageView.isVisible = false
+                    thumbnailImageView.isVisible = true
+                }
+            }
+        }
     }
 
     companion object {

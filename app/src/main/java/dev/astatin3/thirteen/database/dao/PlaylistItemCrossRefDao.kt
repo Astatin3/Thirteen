@@ -54,4 +54,7 @@ interface PlaylistItemCrossRefDao {
      */
     @Query("SELECT audio_uri FROM PlaylistItemCrossRef WHERE playlist_id = :playlistId ORDER BY sort_order")
     fun getOrderedItemUris(playlistId: Long): Flow<List<Uri>>
+
+    @Query("SELECT audio_uri FROM PlaylistItemCrossRef WHERE playlist_id = :playlistId ORDER BY sort_order")
+    suspend fun _getOrderedItemUrisSync(playlistId: Long): List<Uri>
 }

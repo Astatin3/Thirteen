@@ -52,6 +52,7 @@ import dev.astatin3.thirteen.ui.recyclerview.SimpleListAdapter
 import dev.astatin3.thirteen.ui.recyclerview.UniqueItemDiffCallback
 import dev.astatin3.thirteen.ui.views.FullscreenLoadingProgressBar
 import dev.astatin3.thirteen.ui.views.ListItem
+import dev.astatin3.thirteen.ThirteenApplication
 import dev.astatin3.thirteen.utils.PermissionsChecker
 import dev.astatin3.thirteen.utils.PermissionsUtils
 import dev.astatin3.thirteen.utils.TimestampFormatter
@@ -90,6 +91,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
 
     // Recyclerview
     private var currentPlaylistAudios = listOf<Audio>()
+    private var canReorder = true
 
     private val adapter by lazy {
         object : SimpleListAdapter<Audio, ListItem>(
@@ -97,23 +99,30 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
             ::ListItem,
         ) {
             override fun submitList(list: List<Audio>?) {
-                currentPlaylistAudios = list.orEmpty()
+                val newList = list.orEmpty()
+                Log.d(LOG_TAG, "submitList: ${newList.size} items, uri0=${newList.firstOrNull()?.uri}, fromDb=${newList.map { it.title?.take(15) }}")
+                currentPlaylistAudios = newList
                 super.submitList(list)
             }
 
             override fun ViewHolder.onPrepareView() {
                 view.setLeadingIconImage(R.drawable.ic_music_note)
-                view.setTrailingIconImage(R.drawable.ic_drag_handle)
-
-                view.findViewById<ImageView>(R.id.trailingIconImageView).setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        itemTouchHelper.startDrag(this)
-                    }
-                    false
-                }
             }
 
             override fun ViewHolder.onBindView(item: Audio) {
+                val trailingIconView = view.findViewById<ImageView>(R.id.trailingIconImageView)
+                if (canReorder) {
+                    view.setTrailingIconImage(R.drawable.ic_drag_handle)
+                    trailingIconView.setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) {
+                            itemTouchHelper.startDrag(this)
+                        }
+                        false
+                    }
+                } else {
+                    view.trailingIconImage = null
+                    trailingIconView.setOnTouchListener(null)
+                }
                 view.setOnClickListener {
                     viewModel.playPlaylist(bindingAdapterPosition)
                 }
@@ -151,12 +160,10 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
                 val from = viewHolder.bindingAdapterPosition
                 val to = target.bindingAdapterPosition
 
+                Log.d(LOG_TAG, "onMove($from -> $to), curSize=${currentPlaylistAudios.size}")
+
                 Collections.swap(currentPlaylistAudios, from, to)
                 recyclerView.adapter!!.notifyItemMoved(from, to)
-
-                viewModel.reorderPlaylist(
-                    currentPlaylistAudios.map { audio -> audio.uri }
-                )
 
                 return true
             }
@@ -164,6 +171,19 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
 
             override fun isLongPressDragEnabled() = false
+
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                super.clearView(recyclerView, viewHolder)
+                if (!canReorder) return
+                val uris = try {
+                    currentPlaylistAudios.map { audio -> audio.uri }
+                } catch (e: Exception) {
+                    Log.e(LOG_TAG, "clearView: failed to map URIs", e)
+                    return
+                }
+                Log.d(LOG_TAG, "clearView: drag ended, vmClass=${viewModel::class.java.name}, uris=$uris")
+                viewModel.reorderPlaylist(uris)
+            }
         }
     }
     private val itemTouchHelper by lazy { ItemTouchHelper(itemTouchHelperCallback) }
@@ -260,7 +280,6 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
         }
 
         recyclerView.adapter = adapter
-        itemTouchHelper.attachToRecyclerView(recyclerView)
 
         playAllExtendedFloatingActionButton.setOnClickListener {
             viewModel.playPlaylist()
@@ -300,6 +319,17 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
 
                     is FlowResult.Success -> {
                         val (playlist, audios) = it.data
+                        Log.d(LOG_TAG, "playlist Flow emitted Success: ${audios.size} items, first3=${audios.take(3).map { a -> a.title?.take(15) }}, type=${playlist.type}")
+
+                        val isPlaylist = playlist.type == Playlist.Type.PLAYLIST
+                        if (canReorder != isPlaylist) {
+                            canReorder = isPlaylist
+                            if (isPlaylist) {
+                                itemTouchHelper.attachToRecyclerView(recyclerView)
+                            } else {
+                                itemTouchHelper.attachToRecyclerView(null)
+                            }
+                        }
 
                         val playlistName = playlist.name ?: getString(
                             when (playlist.type) {
@@ -420,7 +450,7 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
     }
 
     companion object {
-        private val LOG_TAG = PlaylistFragment::class.simpleName!!
+        private const val LOG_TAG = "PlaylistFragment"
 
         private const val ARG_PLAYLIST_URI = "playlist_uri"
 

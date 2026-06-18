@@ -78,16 +78,26 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
     private var reorderJob: Job? = null
 
     fun reorderPlaylist(audioUris: List<Uri>) {
-        Log.d(LOG_TAG, "reorderPlaylist called with ${audioUris.size} items")
-        reorderJob?.cancel()
-        reorderJob = viewModelScope.launch {
-            playlistUri.value?.let { playlistUri ->
-                Log.d(LOG_TAG, "Persisting reorder for $playlistUri")
-                withContext(Dispatchers.IO) {
-                    mediaRepository.reorderPlaylist(playlistUri, audioUris)
+        Log.d(LOG_TAG, "reorderPlaylist entered: ${audioUris.size} items, cancelling prev=$reorderJob")
+        try {
+            reorderJob?.cancel()
+            reorderJob = viewModelScope.launch {
+                try {
+                    playlistUri.value?.let { playlistUri ->
+                        Log.d(LOG_TAG, "Persisting reorder for $playlistUri, firstUri=${audioUris.firstOrNull()}")
+                        val result = withContext(Dispatchers.IO) {
+                            mediaRepository.reorderPlaylist(playlistUri, audioUris)
+                        }
+                        Log.d(LOG_TAG, "Reorder result: $result")
+                    } ?: Log.w(LOG_TAG, "Cannot reorder: playlistUri is null")
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(LOG_TAG, "reorder coroutine failed", e)
                 }
-                Log.d(LOG_TAG, "Reorder persisted successfully")
-            } ?: Log.w(LOG_TAG, "Cannot reorder: playlistUri is null")
+            }
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "reorderPlaylist threw before launch", e)
         }
     }
 
@@ -108,6 +118,6 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
     }
 
     companion object {
-        private val LOG_TAG = PlaylistViewModel::class.simpleName!!
+        private const val LOG_TAG = "PlaylistViewModel"
     }
 }

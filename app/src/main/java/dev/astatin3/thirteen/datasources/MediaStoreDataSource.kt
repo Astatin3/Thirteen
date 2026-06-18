@@ -10,8 +10,10 @@ import android.content.ContentUris
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.provider.BaseColumns
 import android.provider.MediaStore
+import androidx.room.withTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -752,13 +754,16 @@ class MediaStoreDataSource(
                 database.getPlaylistDao().getById(playlistId),
                 database.getPlaylistItemCrossRefDao().getOrderedItemUris(playlistId),
             ) { playlistEntity, orderedUris ->
+                Log.d(LOG_TAG, "playlist() combine re-emit: playlistId=$playlistId, orderedUris=${orderedUris.map { ContentUris.parseId(it) }}")
                 playlistEntity to orderedUris
             }.flatMapLatest { (playlistEntity, orderedUris) ->
                 playlistEntity?.let {
                     val playlist = it.toModel()
 
                     audios(orderedUris).mapLatest { items ->
-                        Result.Success(playlist to items.filterNotNull())
+                        val result = items.filterNotNull()
+                        Log.d(LOG_TAG, "playlist() audios resolved: ${result.size} items, first3=${result.take(3).map { it.title?.take(15) }}")
+                        Result.Success(playlist to result)
                     }
                 } ?: flowOf(Result.Failure(Error.NOT_FOUND))
             }
@@ -836,18 +841,29 @@ class MediaStoreDataSource(
     override suspend fun reorderPlaylist(
         playlistUri: Uri,
         audioUris: List<Uri>,
-    ) = when {
-        playlistUri == favoritesUri -> Result.Failure(Error.IO)
-        else -> {
-            val playlistId = ContentUris.parseId(playlistUri)
-            val dao = database.getPlaylistItemCrossRefDao()
+    ) = try {
+        when {
+            playlistUri == favoritesUri -> Result.Failure(Error.IO)
+            else -> {
+                val playlistId = ContentUris.parseId(playlistUri)
+                Log.d(LOG_TAG, "reorderPlaylist: playlistId=$playlistId, ${audioUris.size} items")
+                val dao = database.getPlaylistItemCrossRefDao()
 
-            audioUris.forEachIndexed { index, audioUri ->
-                dao._setItemOrder(playlistId, audioUri, index)
+                database.withTransaction {
+                    audioUris.forEachIndexed { index, audioUri ->
+                        dao._setItemOrder(playlistId, audioUri, index)
+                    }
+                }
+
+                Log.d(LOG_TAG, "reorderPlaylist done, verifying...")
+                val verify = dao._getOrderedItemUrisSync(playlistId)
+                Log.d(LOG_TAG, "After reorder DB order: ${verify.map { ContentUris.parseId(it) }}")
+                Result.Success(Unit)
             }
-
-            Result.Success(Unit)
         }
+    } catch (e: Exception) {
+        Log.e(LOG_TAG, "reorderPlaylist threw", e)
+        Result.Failure(Error.IO)
     }
 
     override suspend fun onAudioPlayed(
@@ -1092,6 +1108,7 @@ class MediaStoreDataSource(
     }
 
     companion object {
+        private const val LOG_TAG = "MediaStoreDataSource"
         // packages/providers/MediaProvider/src/com/android/providers/media/LocalUriMatcher.java
         private const val AUDIO_ALBUMART = "albumart"
 

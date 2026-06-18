@@ -362,7 +362,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         navigationBarView.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.activityFragment -> {
+                R.id.libraryFragment -> {
                     viewPager2.currentItem = 0
                     true
                 }
@@ -372,7 +372,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     false
                 }
 
-                R.id.libraryFragment -> {
+                R.id.activityFragment -> {
                     viewPager2.currentItem = 1
                     true
                 }
@@ -460,8 +460,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         // Keep in sync with the BottomNavigationView menu
         private val fragments = arrayOf(
-            { ActivityFragment() },
             { LibraryFragment() },
+            { ActivityFragment() },
         )
 
         private val searchDiffCallback = object : DiffUtil.ItemCallback<MediaItem<*>>() {

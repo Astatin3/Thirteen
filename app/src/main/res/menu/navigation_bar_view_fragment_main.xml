@@ -7,9 +7,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/activityFragment"
-        android:icon="@drawable/ic_home"
-        android:title="@string/main_fragment_section_activity"
+        android:id="@+id/libraryFragment"
+        android:icon="@drawable/ic_lineage_library"
+        android:title="@string/main_fragment_section_library"
         app:tint="?attr/colorOnSurface" />
 
     <item
@@ -19,9 +19,9 @@
         app:tint="?attr/colorOnSurface" />
 
     <item
-        android:id="@+id/libraryFragment"
-        android:icon="@drawable/ic_lineage_library"
-        android:title="@string/main_fragment_section_library"
+        android:id="@+id/activityFragment"
+        android:icon="@drawable/ic_home"
+        android:title="@string/main_fragment_section_activity"
         app:tint="?attr/colorOnSurface" />
 
 </menu>

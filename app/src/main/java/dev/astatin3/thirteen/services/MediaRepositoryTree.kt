@@ -165,10 +165,10 @@ class MediaRepositoryTree(
     suspend fun getChildren(mediaId: String) = when (mediaId) {
         ROOT_MEDIA_ITEM_ID -> when (context.permissionsGranted(PermissionsUtils.mainPermissions)) {
             true -> listOf(
+                playlistsMediaItem,
                 albumsMediaItem,
                 artistsMediaItem,
                 genresMediaItem,
-                playlistsMediaItem,
                 changeProviderMediaItem,
             )
 

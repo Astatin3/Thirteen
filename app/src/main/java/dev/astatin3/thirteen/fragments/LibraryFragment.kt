@@ -29,6 +29,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
         @StringRes val titleStringResId: Int,
         val fragment: () -> Fragment,
     ) {
+        PLAYLISTS(
+            R.string.library_fragment_menu_playlists,
+            { PlaylistsFragment() },
+        ),
         ALBUMS(
             R.string.library_fragment_menu_albums,
             { AlbumsFragment() },
@@ -40,10 +44,6 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
         GENRES(
             R.string.library_fragment_menu_genres,
             { GenresFragment() },
-        ),
-        PLAYLISTS(
-            R.string.library_fragment_menu_playlists,
-            { PlaylistsFragment() },
         ),
     }
 

@@ -271,6 +271,35 @@ class MediaItemViewModel(application: Application) : ThirteenViewModel(applicati
         this.playlistUri.value = playlistUri
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val canEditPlaylist = mediaItem
+        .mapLatestDataOrNull()
+        .mapLatest {
+            it is Playlist && it.type == Playlist.Type.PLAYLIST
+        }
+        .flowOn(Dispatchers.IO)
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false,
+        )
+
+    suspend fun renamePlaylist(name: String) {
+        uri.value?.let { playlistUri ->
+            withContext(Dispatchers.IO) {
+                mediaRepository.renamePlaylist(playlistUri, name)
+            }
+        }
+    }
+
+    suspend fun deletePlaylist() {
+        uri.value?.let { playlistUri ->
+            withContext(Dispatchers.IO) {
+                mediaRepository.deletePlaylist(playlistUri)
+            }
+        }
+    }
+
     fun playNow() {
         tracks.value.takeIf { it.isNotEmpty() }?.let {
             playAudio(it, 0)

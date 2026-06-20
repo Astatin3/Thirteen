@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import coil3.load
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ import dev.astatin3.thirteen.models.FlowResult
 import dev.astatin3.thirteen.models.Genre
 import dev.astatin3.thirteen.models.Playlist
 import dev.astatin3.thirteen.ui.views.FullscreenLoadingProgressBar
+import dev.astatin3.thirteen.ui.dialogs.EditTextMaterialAlertDialogBuilder
 import dev.astatin3.thirteen.ui.views.ListItem
 import dev.astatin3.thirteen.utils.PermissionsChecker
 import dev.astatin3.thirteen.utils.PermissionsUtils
@@ -58,6 +60,8 @@ class MediaItemBottomSheetDialogFragment : ThirteenBottomSheetDialogFragment(
     private val openAlbumListItem by getViewProperty<ListItem>(R.id.openAlbumListItem)
     private val openArtistListItem by getViewProperty<ListItem>(R.id.openArtistListItem)
     private val openGenreListItem by getViewProperty<ListItem>(R.id.openGenreListItem)
+    private val renamePlaylistListItem by getViewProperty<ListItem>(R.id.renamePlaylistListItem)
+    private val deletePlaylistListItem by getViewProperty<ListItem>(R.id.deletePlaylistListItem)
     private val placeholderImageView by getViewProperty<ImageView>(R.id.placeholderImageView)
     private val playNowListItem by getViewProperty<ListItem>(R.id.playNowListItem)
     private val playNextListItem by getViewProperty<ListItem>(R.id.playNextListItem)
@@ -168,6 +172,14 @@ class MediaItemBottomSheetDialogFragment : ThirteenBottomSheetDialogFragment(
                     GenreFragment.createBundle(genreUri)
                 )
             }
+        }
+
+        renamePlaylistListItem.setOnClickListener {
+            showRenamePlaylistAlertDialog()
+        }
+
+        deletePlaylistListItem.setOnClickListener {
+            showDeletePlaylistAlertDialog()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -340,6 +352,44 @@ class MediaItemBottomSheetDialogFragment : ThirteenBottomSheetDialogFragment(
                 }
             }
         }
+
+        launch {
+            viewModel.canEditPlaylist.collectLatest { canEdit ->
+                renamePlaylistListItem.isVisible = canEdit
+                deletePlaylistListItem.isVisible = canEdit
+            }
+        }
+    }
+
+    private fun showRenamePlaylistAlertDialog() {
+        EditTextMaterialAlertDialogBuilder(requireContext())
+            .setText(titleTextView.text.toString())
+            .setPositiveButton(R.string.rename_playlist_positive) { text ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    fullscreenLoadingProgressBar.withProgress {
+                        viewModel.renamePlaylist(text)
+                    }
+                }
+            }
+            .setTitle(R.string.rename_playlist)
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showDeletePlaylistAlertDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.delete_playlist)
+            .setMessage(R.string.delete_playlist_message)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    fullscreenLoadingProgressBar.withProgress {
+                        viewModel.deletePlaylist()
+                        findNavController().navigateUp()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     companion object {

@@ -135,6 +135,22 @@
             app:leadingIconImage="@drawable/ic_playlist_add" />
 
         <dev.astatin3.thirteen.ui.views.ListItem
+            android:id="@+id/renamePlaylistListItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:headlineText="@string/rename_playlist"
+            app:leadingIconImage="@drawable/ic_edit_note" />
+
+        <dev.astatin3.thirteen.ui.views.ListItem
+            android:id="@+id/deletePlaylistListItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:headlineText="@string/delete_playlist"
+            app:leadingIconImage="@drawable/ic_playlist_remove" />
+
+        <dev.astatin3.thirteen.ui.views.ListItem
             android:id="@+id/openAlbumListItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

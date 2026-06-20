@@ -15,7 +15,7 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 
 object PlaylistThumbnailCompositor {
-    private const val TARGET_SIZE = 256
+    private const val TARGET_SIZE = 1024
 
     suspend fun composite(
         context: Context,

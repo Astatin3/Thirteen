@@ -22,10 +22,11 @@
 
     <ImageView
         android:id="@+id/leadingIconImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="16dp"
         android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
         android:visibility="gone"
         app:tint="@color/list_item_primary"
         tools:src="@android:drawable/star_on"

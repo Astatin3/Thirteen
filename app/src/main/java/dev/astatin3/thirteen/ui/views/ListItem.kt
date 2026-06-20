@@ -24,8 +24,12 @@ import androidx.annotation.StringRes
 import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
+import coil3.load
+import coil3.request.error
+import coil3.request.placeholder
+import coil3.request.transformations
+import coil3.transform.RoundedCornersTransformation
 import dev.astatin3.thirteen.R
-import dev.astatin3.thirteen.ext.loadThumbnail
 import dev.astatin3.thirteen.ext.use
 
 /**
@@ -202,7 +206,11 @@ class ListItem @JvmOverloads constructor(
     ) {
         leadingIconImageView.imageTintList = null
         leadingIconImageView.isVisible = true
-        leadingIconImageView.loadThumbnail(data, placeholder = placeholderResId)
+        leadingIconImageView.load(data) {
+            placeholder(placeholderResId)
+            error(placeholderResId)
+            transformations(RoundedCornersTransformation(8f))
+        }
     }
 
     fun setLeadingText(@StringRes resId: Int) = leadingTextView.setTextAndUpdateVisibility(resId)

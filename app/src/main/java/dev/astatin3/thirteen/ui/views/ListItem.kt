@@ -24,6 +24,7 @@ import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
 import dev.astatin3.thirteen.R
+import dev.astatin3.thirteen.ext.loadThumbnail
 import dev.astatin3.thirteen.ext.use
 
 /**
@@ -44,6 +45,7 @@ class ListItem @JvmOverloads constructor(
     private val trailingSupportingTextView by lazy { findViewById<TextView>(R.id.trailingSupportingTextView) }
     private val trailingViewContainerFrameLayout by lazy { findViewById<FrameLayout>(R.id.trailingViewContainerFrameLayout) }
 
+    private val leadingIconOriginalTint = leadingIconImageView.imageTintList
     private var cardCornerRadius: Float = 0f
 
     var leadingIconImage: Drawable?
@@ -184,10 +186,21 @@ class ListItem @JvmOverloads constructor(
 
     fun setLeadingIconImage(bm: Bitmap) = leadingIconImageView.setImageAndUpdateVisibility(bm)
     fun setLeadingIconImage(icon: Icon) = leadingIconImageView.setImageAndUpdateVisibility(icon)
-    fun setLeadingIconImage(@DrawableRes resId: Int) =
+    fun setLeadingIconImage(@DrawableRes resId: Int) {
+        leadingIconImageView.imageTintList = leadingIconOriginalTint
         leadingIconImageView.setImageAndUpdateVisibility(resId)
+    }
 
     fun setLeadingIconImage(uri: Uri) = leadingIconImageView.setImageAndUpdateVisibility(uri)
+
+    fun loadLeadingIconImage(
+        data: Any?,
+        @DrawableRes placeholderResId: Int,
+    ) {
+        leadingIconImageView.imageTintList = null
+        leadingIconImageView.isVisible = true
+        leadingIconImageView.loadThumbnail(data, placeholder = placeholderResId)
+    }
 
     fun setLeadingText(@StringRes resId: Int) = leadingTextView.setTextAndUpdateVisibility(resId)
     fun setLeadingText(@StringRes resId: Int, vararg formatArgs: Any) =

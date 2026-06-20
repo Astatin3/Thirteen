@@ -141,6 +141,12 @@ class PlaylistFragment : CollapsingToolbarLayoutFragment(R.layout.fragment_playl
                 view.trailingSupportingText = item.durationMs?.let {
                     TimestampFormatter.formatTimestampMillis(it)
                 }
+                item.thumbnail?.let { thumbnail ->
+                    view.loadLeadingIconImage(
+                        thumbnail.uri ?: thumbnail.bitmap,
+                        R.drawable.ic_music_note,
+                    )
+                } ?: view.setLeadingIconImage(R.drawable.ic_music_note)
             }
         }
     }

@@ -6,6 +6,7 @@
 package dev.astatin3.thirteen.ui.views
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -45,7 +46,7 @@ class ListItem @JvmOverloads constructor(
     private val trailingSupportingTextView by lazy { findViewById<TextView>(R.id.trailingSupportingTextView) }
     private val trailingViewContainerFrameLayout by lazy { findViewById<FrameLayout>(R.id.trailingViewContainerFrameLayout) }
 
-    private val leadingIconOriginalTint = leadingIconImageView.imageTintList
+    private var leadingIconOriginalTint: ColorStateList? = null
     private var cardCornerRadius: Float = 0f
 
     var leadingIconImage: Drawable?
@@ -133,6 +134,8 @@ class ListItem @JvmOverloads constructor(
         strokeWidth = 0
 
         inflate(context, R.layout.list_item, this)
+
+        leadingIconOriginalTint = leadingIconImageView.imageTintList
 
         context.obtainStyledAttributes(attrs, R.styleable.ListItem, 0, 0).use {
             cardCornerRadius = it.getDimension(

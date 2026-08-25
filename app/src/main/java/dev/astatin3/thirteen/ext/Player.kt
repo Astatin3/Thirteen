@@ -5,12 +5,9 @@
 
 package dev.astatin3.thirteen.ext
 
-import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.TrackSelectionParameters
-import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -168,20 +165,3 @@ val Player.mediaItems: List<MediaItem>
     get() = (0 until mediaItemCount).map {
         getMediaItemAt(it)
     }
-
-@OptIn(UnstableApi::class)
-fun Player.setOffloadEnabled(enabled: Boolean) {
-    trackSelectionParameters = trackSelectionParameters.buildUpon()
-        .setAudioOffloadPreferences(
-            TrackSelectionParameters.AudioOffloadPreferences
-                .Builder()
-                .setAudioOffloadMode(
-                    if (enabled) {
-                        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
-                    } else {
-                        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
-                    }
-                )
-                .build()
-        ).build()
-}

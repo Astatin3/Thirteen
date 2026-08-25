@@ -20,11 +20,13 @@ import androidx.media3.common.HeartRating
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Rating
+import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.listen
 import androidx.media3.common.util.ExperimentalApi
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.LibraryResult
@@ -50,7 +52,6 @@ import dev.astatin3.thirteen.ext.enableOffload
 import dev.astatin3.thirteen.ext.mapAsync
 import dev.astatin3.thirteen.ext.mediaItems
 import dev.astatin3.thirteen.ext.next
-import dev.astatin3.thirteen.ext.setOffloadEnabled
 import dev.astatin3.thirteen.ext.skipSilence
 import dev.astatin3.thirteen.ext.stopPlaybackOnTaskRemoved
 import dev.astatin3.thirteen.ext.typedRepeatMode
@@ -383,7 +384,16 @@ class PlaybackService : MediaLibraryService() {
             when (CustomCommand.fromCustomAction(customCommand.customAction)) {
                 CustomCommand.TOGGLE_OFFLOAD -> {
                     args.getBoolean(CustomCommand.ARG_VALUE).let {
-                        player.setOffloadEnabled(it)
+                        player.trackSelectionParameters =
+                            player.trackSelectionParameters.buildUpon()
+                                .setAudioOffloadPreferences(
+                                    TrackSelectionParameters.AudioOffloadPreferences
+                                        .Builder()
+                                        .setAudioOffloadMode(
+                                            getOffloadMode(it)
+                                        )
+                                        .build()
+                                ).build()
                     }
 
                     SessionResult(SessionResult.RESULT_SUCCESS)
@@ -451,13 +461,21 @@ class PlaybackService : MediaLibraryService() {
                     },
                 )
             )
+            .setTrackSelector(DefaultTrackSelector(this).apply {
+                setParameters(
+                    buildUponParameters()
+                        .setAudioOffloadPreferences(
+                            TrackSelectionParameters.AudioOffloadPreferences.Builder()
+                                .setAudioOffloadMode(
+                                    getOffloadMode(sharedPreferences.enableOffload)
+                                ).build()
+                        )
+                )
+            })
             .setSkipSilenceEnabled(sharedPreferences.skipSilence)
             .setWakeMode(C.WAKE_MODE_NETWORK)
             .experimentalSetDynamicSchedulingEnabled(true)
             .build()
-            .apply {
-                setOffloadEnabled(sharedPreferences.enableOffload)
-            }
 
         mediaLibrarySession = MediaLibrarySession.Builder(
             this, player, mediaLibrarySessionCallback
@@ -674,6 +692,12 @@ class PlaybackService : MediaLibraryService() {
             resumptionPlaylist.startPositionMs
         )
         player.prepare()
+    }
+
+    private fun getOffloadMode(enabled: Boolean) = if (enabled) {
+        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
+    } else {
+        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
     }
 
     companion object {

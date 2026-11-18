@@ -18,6 +18,7 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.HeartRating
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Rating
 import androidx.media3.common.TrackSelectionParameters
@@ -26,6 +27,7 @@ import androidx.media3.common.util.ExperimentalApi
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -205,6 +207,72 @@ class PlaybackService : MediaLibraryService() {
                     )
                 }
             }
+
+            override fun onAudioUnderrun(
+                eventTime: AnalyticsListener.EventTime,
+                bufferSize: Int,
+                bufferSizeMs: Long,
+                elapsedSinceLastFeedMs: Long,
+            ) {
+                Log.w(
+                    LOG_TAG,
+                    "Audio underrun: bufferSize=${bufferSize}B (${bufferSizeMs}ms), " +
+                        "elapsedSinceLastFeed=${elapsedSinceLastFeedMs}ms, " +
+                        "position=${eventTime.currentPlaybackPositionMs}ms",
+                )
+            }
+
+            override fun onAudioSinkError(
+                eventTime: AnalyticsListener.EventTime,
+                audioSinkError: Exception,
+            ) {
+                Log.w(LOG_TAG, "Audio sink error", audioSinkError)
+            }
+
+            override fun onAudioCodecError(
+                eventTime: AnalyticsListener.EventTime,
+                audioCodecError: Exception,
+            ) {
+                Log.w(LOG_TAG, "Audio codec error", audioCodecError)
+            }
+
+            override fun onPlayerError(
+                eventTime: AnalyticsListener.EventTime,
+                error: PlaybackException,
+            ) {
+                Log.e(LOG_TAG, "Player error ${error.errorCodeName}", error)
+            }
+
+            override fun onPlaybackStateChanged(
+                eventTime: AnalyticsListener.EventTime,
+                state: Int,
+            ) {
+                if (state == Player.STATE_BUFFERING) {
+                    Log.i(
+                        LOG_TAG,
+                        "Buffering at ${eventTime.currentPlaybackPositionMs}ms, " +
+                            "buffered=${eventTime.totalBufferedDurationMs}ms",
+                    )
+                }
+            }
+
+            override fun onAudioTrackInitialized(
+                eventTime: AnalyticsListener.EventTime,
+                audioTrackConfig: AudioSink.AudioTrackConfig,
+            ) {
+                Log.d(LOG_TAG, "AudioTrack initialized: ${audioTrackConfig.describe()}")
+            }
+
+            override fun onAudioTrackReleased(
+                eventTime: AnalyticsListener.EventTime,
+                audioTrackConfig: AudioSink.AudioTrackConfig,
+            ) {
+                Log.d(LOG_TAG, "AudioTrack released: ${audioTrackConfig.describe()}")
+            }
+
+            private fun AudioSink.AudioTrackConfig.describe() =
+                "encoding=$encoding, sampleRate=$sampleRate, " +
+                    "channelConfig=$channelConfig, offload=$offload, bufferSize=$bufferSize"
         }
     }
 

@@ -164,7 +164,7 @@ class MediaRepositoryTree(
     /**
      * Given a media ID, gets it's corresponding media item.
      */
-    suspend fun getItem(mediaId: String) = when (mediaId) {
+    suspend fun getItem(mediaId: String) = withContext(Dispatchers.IO) { when (mediaId) {
         ROOT_MEDIA_ITEM_ID -> rootMediaItem
 
         NO_PERMISSIONS_MEDIA_ITEM_ID -> noPermissionsMediaItem
@@ -197,12 +197,12 @@ class MediaRepositoryTree(
 
             else -> mediaIdToMediaItem(mediaId)?.toMedia3MediaItem(context.resources)
         }
-    }
+    } }
 
     /**
      * Given an item's media ID, gets its children.
      */
-    suspend fun getChildren(mediaId: String) = when (mediaId) {
+    suspend fun getChildren(mediaId: String) = withContext(Dispatchers.IO) { when (mediaId) {
         ROOT_MEDIA_ITEM_ID -> when (context.permissionsGranted(PermissionsUtils.mainPermissions)) {
             true -> listOf(
                 playlistsMediaItem,
@@ -312,13 +312,13 @@ class MediaRepositoryTree(
                 }
             }
         }
-    } ?: emptyList()
+    } ?: emptyList() }
 
     /**
      * Given a list of media items, gets an equivalent list of items that can be passed to the
      * player. This should be used with onAddMediaItems and onSetMediaItems.
      */
-    suspend fun resolveMediaItems(mediaItems: List<MediaItem>) = buildList {
+    suspend fun resolveMediaItems(mediaItems: List<MediaItem>) = withContext(Dispatchers.IO) { buildList {
         mediaItems.forEach { item ->
             val searchQuery = item.requestMetadata.searchQuery
             when {
@@ -339,7 +339,7 @@ class MediaRepositoryTree(
                 }
             }
         }
-    }
+    } }
 
     private suspend fun resolveSyntheticParentTracks(
         uri: Uri
@@ -352,9 +352,10 @@ class MediaRepositoryTree(
     /**
      * Given a query, search for media items.
      */
-    suspend fun search(query: String) = repository.search("%${query}%").toOneShotResult().map {
-        it.toMedia3MediaItem(context.resources)
-    }
+    suspend fun search(query: String) =
+        withContext(Dispatchers.IO) { repository.search("%${query}%").toOneShotResult().map {
+            it.toMedia3MediaItem(context.resources)
+        } }
 
     /**
      * Set the favorite status of a media item. Note that it will only work for audio items.
@@ -366,12 +367,12 @@ class MediaRepositoryTree(
     suspend fun setFavorite(
         mediaId: String,
         isFavorite: Boolean,
-    ) = mediaIdToMediaItemUri(mediaId)?.let {
+    ) = withContext(Dispatchers.IO) { mediaIdToMediaItemUri(mediaId)?.let {
         when (mediaItemUriToMediaType(it)) {
             MediaType.AUDIO -> repository.setFavorite(it, isFavorite).getOrNull()
             else -> null
         }
-    }?.let { true } ?: false
+    }?.let { true } ?: false }
 
     /**
      * Convert this media ID to a [Uri] if valid.

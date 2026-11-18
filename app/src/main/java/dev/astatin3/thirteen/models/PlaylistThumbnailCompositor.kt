@@ -15,7 +15,7 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 
 object PlaylistThumbnailCompositor {
-    private const val TARGET_SIZE = 1024
+    private const val TARGET_SIZE = 512
 
     suspend fun composite(
         context: Context,
@@ -55,6 +55,7 @@ object PlaylistThumbnailCompositor {
                     val result = context.imageLoader.execute(
                         ImageRequest.Builder(context)
                             .data(data.uri)
+                            .size(targetSize)
                             .allowHardware(false)
                             .build()
                     )

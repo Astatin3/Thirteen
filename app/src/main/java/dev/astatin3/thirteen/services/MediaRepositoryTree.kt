@@ -11,16 +11,18 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.withContext
 import dev.astatin3.thirteen.R
 import dev.astatin3.thirteen.ext.buildMediaItem
 import dev.astatin3.thirteen.ext.permissionsGranted
-import dev.astatin3.thirteen.ext.toByteArray
+import dev.astatin3.thirteen.ext.toPngByteArray
 import dev.astatin3.thirteen.models.MediaType
 import dev.astatin3.thirteen.models.Playlist
 import dev.astatin3.thirteen.models.PlaylistThumbnailCompositor
@@ -431,9 +433,13 @@ class MediaRepositoryTree(
             .mapNotNull { it.thumbnail }
             .take(4)
 
-        val composite = if (thumbnails.isNotEmpty()) {
-            PlaylistThumbnailCompositor.composite(context, thumbnails)
-        } else null
+        val artwork = withContext(Dispatchers.IO) {
+            if (thumbnails.isEmpty()) {
+                null
+            } else {
+                PlaylistThumbnailCompositor.composite(context, thumbnails)?.toPngByteArray()
+            }
+        }
 
         val title = playlist.name ?: context.getString(
             when (playlist.type) {
@@ -449,7 +455,7 @@ class MediaRepositoryTree(
             isBrowsable = true,
             mediaType = MediaMetadata.MEDIA_TYPE_PLAYLIST,
             sourceUri = playlist.uri,
-            artworkData = composite?.toByteArray(),
+            artworkData = artwork,
             artworkType = MediaMetadata.PICTURE_TYPE_FRONT_COVER,
         )
     }

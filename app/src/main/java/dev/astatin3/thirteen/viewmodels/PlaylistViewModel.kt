@@ -79,6 +79,7 @@ class PlaylistViewModel(application: Application) : ThirteenViewModel(applicatio
                 else -> null
             }
         }
+        .flowOn(Dispatchers.IO)
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(),
